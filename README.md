@@ -21,7 +21,10 @@ Temp controls how random the model is, e.g. temp of 1 will make model unpredicti
 git clone https://huggingface.co/Gustavosta/MagicPrompt-Stable-Diffusion
 ```
 3. Add flag `--disable-safe-unpickle` to `COMMANDLINE_ARGS` due to some problems with how `safe.py` (internal WebUI file) detects malicious models (if you download models from trusted source, you will be fine) (read WebUI's [wiki](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Command-Line-Arguments-and-Settings) on how to do this)
-4. You are done!
+4. Open `<WebUI folder>\requirements_versions.txt` and add **aitextgen** to the end of the list
+5. Launch and wait until it says `Running on local URL:  http://127.0.0.1:7860` in console (or something similar)
+6. <small>(Optional but recommended)</small> Edit the `<WebUI folder>\requirements_versions.txt` and remove the **aitextgen** line after it has successfully run at least once, that way `git pull` won't throw errors on you.
+7. You are done!
 ## Why prompt is same for multiple images???
 
 well, i didnt figure out how to change prompt from image to image. so, for now it changes prompt from batch to batch (you need to change **batch count** not **batch size**). if you did everything and still has this problem, create an issue and describe what you did and what the settings are.
