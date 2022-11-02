@@ -24,7 +24,7 @@ git clone https://huggingface.co/Gustavosta/MagicPrompt-Stable-Diffusion
 4. You are done!
 ## Why prompt is same for multiple images???
 
-well, i didnt figure out how to change prompt from image to image. so, for now it changes prompt from batch to batch (you need to change **batch count** not **batch size**)
+well, i didnt figure out how to change prompt from image to image. so, for now it changes prompt from batch to batch (you need to change **batch count** not **batch size**). if you did everything and still has this problem, create an issue and describe what you did and what the settings are.
 
 ## Credits
 
