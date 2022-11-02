@@ -20,8 +20,8 @@ Temp controls how random the model is, e.g. temp of 1 will make model unpredicti
 ```
 git clone https://huggingface.co/Gustavosta/MagicPrompt-Stable-Diffusion
 ```
-3. Now you can use the script
-
+3. Add flag `--disable-safe-unpickle` to `COMMANDLINE_ARGS` due to some problems with how `safe.py` (internal WebUI file) detects malicious models (if you download models from trusted source, you will be fine) (read WebUI's [wiki](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Command-Line-Arguments-and-Settings) on how to do this)
+4. You are done!
 ## Why prompt is same for multiple images???
 
 well, i didnt figure out how to change prompt from image to image. so, for now it changes prompt from batch to batch (you need to change **batch count** not **batch size**)
