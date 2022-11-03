@@ -1,5 +1,5 @@
-# MagicPrompt-awebui
-User script for AUTOMATIC111's SD WebUI that integrates MagicPrompt
+# MagicPrompt script for AUTO1111's WebUI
+User script for AUTOMATIC1111's SD WebUI that integrates MagicPrompt
 
 ## About
 
