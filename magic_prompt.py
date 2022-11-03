@@ -24,7 +24,7 @@ Credits:
     Also credits go to u/Letharguss (for creating basic script)
     and SoCalGuitarist#2586 (for figuring out how to change prompt batch to batch)
 
-Version: 0.2.1
+Version: 0.2.2
 """
 
 import os
@@ -37,74 +37,80 @@ import modules.scripts as scripts
 from modules.processing import Processed, process_images
 from modules.shared import state
 
-def getOrdinalNumber(n):
-    ending = "th"
+def getOrdinalNum(n):
     if str(n)[-1] == "1":
-        ending = "st"
+        return f"{n}st"
     elif str(n)[-1] == "2":
-        ending = "nd"
+        return f"{n}nd"
     elif str(n)[-1] == "3":
-        ending = "rd"
-    
-    return f"{n}{ending}"
-
+        return f"{n}rd"
+    else:
+        return f"{n}th"
 
 class Script(scripts.Script):
     def title(self):
         return "MagicPrompt"
 
-    def show(self, is_img2img):
-        return not is_img2img
- 
-    def ui(self, is_img2img):
-        prompt_length = gr.Slider(label='Prompt maximal length', value=150, minimum=1, maximum=300, step=1)
-        temperature_value = gr.Slider(label='Temperature', value=0.7, minimum=0.1, maximum=1.9, step=0.05)
-        same_seed = gr.Checkbox(label='Use same seed for each image', value=False)
-        isUniquePrompt = gr.Checkbox(label="Use unique prompt for each batch", value=True)
-        isPrioritized = gr.Checkbox(label="Initial prompt will have more priority over generated", value=False)
-        isPregenerating = gr.Checkbox(label="Enable prompt pregenerating (Perfomance boost). If you dont know how many images do you want to generate, disable it", value=True)
+    def show(self, isImg2img):
+        # Will show up only in txt2img tab
+        return not isImg2img
+
+    def ui(self, isImg2img):
+        # Some settings
+        promptLength = gr.Slider(label="Prompt max. length", value=75, minimum=1, maximum=300, step=1)
+        temp = gr.Slider(label="Temperature", value=0.7, minimum=0.1, maximum=2, step=0.1)
+        useSameSeed = gr.Checkbox(label="Use same seed for each batch", value=False)
+        useUniquePrompt = gr.Checkbox(label="Use unique prompt for each batch", value=True)
+        isPrioritized = gr.Checkbox(label="Iniatial prompt will have more prority over generated one", value=False)
+        doPregenerating = gr.Checkbox(label="Enable prompt pregenerating (Theoretical perfomance boost). If you dont know how many images do you want to generate, disable it", value=True)
         
-        return [prompt_length, temperature_value, same_seed, isUniquePrompt, isPrioritized, isPregenerating]
- 
-    def run(self, p, prompt_length, temperature_value, same_seed, isUniquePrompt, isPrioritized, isPregenerating):
+        return [promptLength, temp, useSameSeed, useUniquePrompt, isPrioritized, doPregenerating]
+
+    def run(self, p, promptLength, temp, useSameSeed, useUniquePrompt, isPrioritized, doPregenerating):
+        # Searching for folder with MagicPrompt model, if not found, raise and print some info.
         if (not os.path.isdir("./models/MagicPrompt-Stable-Diffusion/")):
             print("It seems you didn't installed MagicPrompt AI model or putted in wrong folder. Make sure it is in a '<webui path>/models/' folder")
             raise Exception("Error: 404. MagicPrompt AI model is not found. Check console for more details.")
 
         p.do_not_save_grid = True
 
+        # If prompt is a list, take first time out of it.
         p.prompt = p.prompt[0] if type(p.prompt) == list else p.prompt
 
-        print(f"Will process {p.batch_size * p.n_iter} images in {p.n_iter} batches.") 
+        print(f"Will process {p.batch_size * p.n_iter} images in {p.n_iter} batches.")
 
+        # As we will change prompt every batch
+        # we need to process only 1 batch at a time
         state.job_count = p.n_iter
-        jobtotal = p.n_iter
         p.n_iter = 1
 
+        # Init prompt prioritazing
         originalPrompt = p.prompt
         if (originalPrompt != "" and isPrioritized):
             originalPrompt = "(" + originalPrompt + ")"
-        
+
+        # Loading MagicPrompt model
         ai = aitextgen(model_folder="./models/MagicPrompt-Stable-Diffusion/", tokenizer_file="./models/MagicPrompt-Stable-Diffusion/tokenizer.json", to_gpu=True)
 
+        # Pregenerating prompts
         prompts = []
-        if (isPregenerating):  
+        if (doPregenerating):  
             print(f"Pregenerating prompt{'s' if state.job_count > 1 else ''}...")
             for i in range(state.job_count):
-                if (i == 0 or isUniquePrompt):
+                if (i == 0 or useUniquePrompt):
                     if state.interrupted:
                         print(f"Pregeneration interrupted")
                         break
                     
-                    prompts.append(ai.generate_one(prompt=originalPrompt, max_length=prompt_length, temperature=temperature_value))
+                    prompts.append(ai.generate_one(prompt=originalPrompt, max_length=promptLength, temperature=temp))
                     if state.job_count > 1:
-                        print(f"Pregenerated {getOrdinalNumber(i+1)} prompt...")
+                        print(f"Pregenerated {getOrdinalNum(i+1)} prompt...")
                 else:
                     break
             print("Pregenerating finished")
 
         images = []
-        for batch_no in range(state.job_count):
+        for i in range(state.job_count):
             if state.skipped:
                 print("Rendering of current batch skipped")
                 continue
@@ -113,22 +119,27 @@ class Script(scripts.Script):
                 print(f"Rendering interrupted")
                 break
             
-            state.job = f"{batch_no+1} out of {jobtotal}"
+            state.job = f"{i+1} out of {state.job_count}"
 
+            # Remove total bar
             sys.stdout.write('\033[2K\033[1G')
             print("\n")
 
-            if (batch_no == 0 or isUniquePrompt):
-                if isPregenerating:
-                    p.prompt = prompts[batch_no]
+            # Prompt applying
+            if (i == 0 or useUniquePrompt):
+                if doPregenerating:
+                    p.prompt = prompts[i]
                 else:
-                    print(f"Generating prompt for {getOrdinalNumber(batch_no+1)} batch...")
-                    p.prompt = ai.generate_one(prompt=originalPrompt, max_length=prompt_length, temperature=temperature_value)
+                    # ...or generate one if pregenerating is disabled
+                    print(f"Generating prompt for {getOrdinalNum(i+1)} batch...")
+                    p.prompt = ai.generate_one(prompt=originalPrompt, max_length=promptLength, temperature=temp)
 
-            print(f"Generated prompt for {getOrdinalNumber(batch_no+1)} batch: {p.prompt}")
+            print(f"Generated prompt for {getOrdinalNum(i+1)} batch: {p.prompt}")
 
+            # for whatever reason .append() doesn't work
             images += process_images(p).images
-            if not same_seed:
+
+            if not useSameSeed:
                 if not p.seed == -1:
                     p.seed += 1
 
