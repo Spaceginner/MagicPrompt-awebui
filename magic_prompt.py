@@ -16,7 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this user script.  If not, see <https://www.gnu.org/licenses/>.
 
 Contact me via Discord (Spaceginner#7688), email (ivan.demian2009@gmail.com)
-or via "Issues" tab on Github (https://github.com/Spaceginner/MagicPrompt-awebui)
+or via "Issues" tab on Github page of this script
+(https://github.com/Spaceginner/MagicPrompt-awebui)
 
 Credits:
     Special thanks to Gustavosta for creating MagicPrompt AI model.
