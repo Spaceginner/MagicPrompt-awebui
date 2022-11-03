@@ -1,5 +1,5 @@
 # MagicPrompt script for AUTO1111's WebUI
-User script for AUTOMATIC1111's SD WebUI that integrates MagicPrompt
+User script for [AUTOMATIC1111's SD WebUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui) that integrates MagicPrompt
 
 ## About
 
