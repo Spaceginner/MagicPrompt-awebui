@@ -15,7 +15,7 @@ Temp controls how random the model is, e.g. temp of 1 will make model unpredicti
 
 ## Installation
 
-1. Download the script, start the webui, wait until it loads, and you are done! It is sooo simple. (if autoinstallation fails, create an issue)
+1. [Download](https://github.com/Spaceginner/MagicPrompt-awebui/releases/download/v1.0.0/magic_prompt.py) the script, start the webui, wait until it loads, and you are done! It is sooo simple. (if autoinstallation fails, create an issue)
 ## Migration
 If you used [original script](https://www.reddit.com/r/StableDiffusion/comments/xvjm84/magicprompt_script_for_automatic1111_gui_let_the/) or versions of this script before the release, find a folder with MagicPrompt model, make sure that it is in `<WebUI folder>/models/` folder and rename folder with the model to `MagicPrompt`, so it won't download duplicate of the model.
 ## Why prompt is same for multiple images???
