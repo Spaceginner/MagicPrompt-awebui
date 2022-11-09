@@ -24,7 +24,7 @@ Credits:
     Also credits go to u/Letharguss (for creating basic script)
     and SoCalGuitarist#2586 (for figuring out how to change prompt batch to batch)
 
-Version: 0.2.2
+Version: 0.2.3
 """
 
 import os
