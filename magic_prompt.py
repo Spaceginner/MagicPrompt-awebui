@@ -48,6 +48,9 @@ def getOrdinalNum(n):
     else:
         return f"{n}th"
 
+# Declering a variable
+ai = None
+
 class Script(scripts.Script):
     def title(self):
         return "MagicPrompt"
@@ -64,10 +67,13 @@ class Script(scripts.Script):
         useUniquePrompt = gr.Checkbox(label="Use unique prompt for each batch", value=True)
         isPrioritized = gr.Checkbox(label="Iniatial prompt will have more prority over generated one", value=False)
         doPregenerating = gr.Checkbox(label="Enable prompt pregenerating (Theoretical perfomance boost). If you dont know how many images do you want to generate, disable it", value=True)
+        doUnloadModel = gr.Checkbox(label="Unload MagicPrompt model from VRAM/RAM after this run. (Decreased perfomance between runs, as it need to load again)", value=False)
         
-        return [promptLength, temp, useSameSeed, useUniquePrompt, isPrioritized, doPregenerating]
+        return [promptLength, temp, useSameSeed, useUniquePrompt, isPrioritized, doPregenerating, doUnloadModel]
 
-    def run(self, p, promptLength, temp, useSameSeed, useUniquePrompt, isPrioritized, doPregenerating):
+    def run(self, p, promptLength, temp, useSameSeed, useUniquePrompt, isPrioritized, doPregenerating, doUnloadModel):
+        global ai
+
         # Searching for folder with MagicPrompt model, if not found, raise and print some info.
         if (not os.path.isdir("./models/MagicPrompt-Stable-Diffusion/")):
             print("It seems you didn't installed MagicPrompt AI model or putted in wrong folder. Make sure it is in a '<webui path>/models/' folder")
@@ -91,7 +97,8 @@ class Script(scripts.Script):
             originalPrompt = "(" + originalPrompt + ")"
 
         # Loading MagicPrompt model
-        ai = aitextgen(model_folder="./models/MagicPrompt-Stable-Diffusion/", tokenizer_file="./models/MagicPrompt-Stable-Diffusion/tokenizer.json", to_gpu=torch.cuda.is_available())
+        if type(ai) != aitextgen:
+            ai = aitextgen(model_folder="./models/MagicPrompt-Stable-Diffusion/", tokenizer_file="./models/MagicPrompt-Stable-Diffusion/tokenizer.json", to_gpu=torch.cuda.is_available())
 
         # Pregenerating prompts
         prompts = []
@@ -143,5 +150,9 @@ class Script(scripts.Script):
             if not useSameSeed:
                 if not p.seed == -1:
                     p.seed += 1
+
+        # Unloading the model
+        if doUnloadModel:
+            ai = None
 
         return Processed(p, images, p.seed, "")
