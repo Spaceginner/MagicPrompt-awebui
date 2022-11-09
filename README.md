@@ -16,6 +16,8 @@ Temp controls how random the model is, e.g. temp of 1 will make model unpredicti
 ## Installation
 
 1. Download the script, start the webui, wait until it loads, and you are done! It is sooo simple. (if autoinstallation fails, create an issue)
+## Migration
+If you used [original script](https://www.reddit.com/r/StableDiffusion/comments/xvjm84/magicprompt_script_for_automatic1111_gui_let_the/) or versions of this script before the release, find a folder with MagicPrompt model, make sure that it is in `<WebUI folder>/models/` folder and rename folder with the model to `MagicPrompt`, so it won't download duplicate of the model.
 ## Why prompt is same for multiple images???
 
 well, i didnt figure out how to change prompt from image to image. so, for now it changes prompt from batch to batch (you need to change **batch count** not **batch size**). if you did everything and still has this problem, create an issue and describe what you did and what the settings are.
