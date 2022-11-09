@@ -32,6 +32,7 @@ import sys
 
 from aitextgen import aitextgen
 import gradio as gr
+import torch
 
 import modules.scripts as scripts
 from modules.processing import Processed, process_images
@@ -90,7 +91,7 @@ class Script(scripts.Script):
             originalPrompt = "(" + originalPrompt + ")"
 
         # Loading MagicPrompt model
-        ai = aitextgen(model_folder="./models/MagicPrompt-Stable-Diffusion/", tokenizer_file="./models/MagicPrompt-Stable-Diffusion/tokenizer.json", to_gpu=True)
+        ai = aitextgen(model_folder="./models/MagicPrompt-Stable-Diffusion/", tokenizer_file="./models/MagicPrompt-Stable-Diffusion/tokenizer.json", to_gpu=torch.cuda.is_available())
 
         # Pregenerating prompts
         prompts = []
