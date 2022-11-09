@@ -24,19 +24,37 @@ Credits:
     Also credits go to u/Letharguss (for creating basic script)
     and SoCalGuitarist#2586 (for figuring out how to change prompt batch to batch)
 
-Version: 0.2.3
+Version: 1.0.0
 """
 
 import os
 import sys
+import subprocess
 
-from aitextgen import aitextgen
+# Try to import aitextgen, if it is not found, download
+try:
+    from aitextgen import aitextgen
+except:
+    print("[MagicPrompt script] aitextgen module is not found, downloading...")
+    if os.path.exists("./venv"):
+        subprocess.call(["./venv/Scripts/python", "-m", "pip", "-q", "--disable-pip-version-check", "--no-input", "install", "aitextgen"])
+    else:
+        subprocess.call(["python", "-m", "pip", "-q", "--disable-pip-version-check", "--no-input", "install", "aitextgen"])
+    print("[MagicPrompt script] aitextgen module is downloaded")
+
 import gradio as gr
 import torch
 
 import modules.scripts as scripts
 from modules.processing import Processed, process_images
 from modules.shared import state
+
+# Searching for folder with MagicPrompt model, if not found, download model
+if (not os.path.isdir("./models/MagicPrompt/")):
+    print("[MagicPrompt script] MagicPrompt model is not found, downloading MagicPrompt model...")
+    os.mkdir("./models/MagicPrompt/")
+    subprocess.call(["git", "clone", "--quiet", "https://huggingface.co/Gustavosta/MagicPrompt-Stable-Diffusion", "./models/MagicPrompt/."])
+    print("[MagicPrompt script] MagicPrompt model is downloaded")
 
 def getOrdinalNum(n):
     if str(n)[-1] == "1":
@@ -48,10 +66,10 @@ def getOrdinalNum(n):
     else:
         return f"{n}th"
 
-# Declering a variable
-ai = None
-
 class Script(scripts.Script):
+    # "Black magic to keep model between runs"
+    gpt = None
+
     def title(self):
         return "MagicPrompt"
 
@@ -72,19 +90,16 @@ class Script(scripts.Script):
         return [promptLength, temp, useSameSeed, useUniquePrompt, isPrioritized, doPregenerating, doUnloadModel]
 
     def run(self, p, promptLength, temp, useSameSeed, useUniquePrompt, isPrioritized, doPregenerating, doUnloadModel):
-        global ai
+        print()
 
-        # Searching for folder with MagicPrompt model, if not found, raise and print some info.
-        if (not os.path.isdir("./models/MagicPrompt-Stable-Diffusion/")):
-            print("It seems you didn't installed MagicPrompt AI model or putted in wrong folder. Make sure it is in a '<webui path>/models/' folder")
-            raise Exception("Error: 404. MagicPrompt AI model is not found. Check console for more details.")
+        # Load MagicPrompt model
+        if type(self.gpt) != aitextgen:
+            self.gpt = aitextgen(model_folder="./models/MagicPrompt/", tokenizer_file="./models/MagicPrompt/tokenizer.json", to_gpu=torch.cuda.is_available())
 
         p.do_not_save_grid = True
 
         # If prompt is a list, take first time out of it.
         p.prompt = p.prompt[0] if type(p.prompt) == list else p.prompt
-
-        print(f"Will process {p.batch_size * p.n_iter} images in {p.n_iter} batches.")
 
         # As we will change prompt every batch
         # we need to process only 1 batch at a time
@@ -96,26 +111,22 @@ class Script(scripts.Script):
         if (originalPrompt != "" and isPrioritized):
             originalPrompt = "(" + originalPrompt + ")"
 
-        # Loading MagicPrompt model
-        if type(ai) != aitextgen:
-            ai = aitextgen(model_folder="./models/MagicPrompt-Stable-Diffusion/", tokenizer_file="./models/MagicPrompt-Stable-Diffusion/tokenizer.json", to_gpu=torch.cuda.is_available())
-
         # Pregenerating prompts
         prompts = []
         if (doPregenerating):  
-            print(f"Pregenerating prompt{'s' if state.job_count > 1 else ''}...")
+            print(f"[MagicPrompt script] Pregenerating prompt{'s' if state.job_count > 1 else ''}...")
             for i in range(state.job_count):
                 if (i == 0 or useUniquePrompt):
                     if state.interrupted:
-                        print(f"Pregeneration interrupted")
+                        print(f"[MagicPrompt script] Pregeneration interrupted")
                         break
                     
-                    prompts.append(ai.generate_one(prompt=originalPrompt, max_length=promptLength, temperature=temp))
+                    prompts.append(self.gpt.generate_one(prompt=originalPrompt, max_length=promptLength, temperature=temp))
                     if state.job_count > 1:
-                        print(f"Pregenerated {getOrdinalNum(i+1)} prompt...")
+                        print(f"[MagicPrompt script] Pregenerated {getOrdinalNum(i+1)} prompt...")
                 else:
                     break
-            print("Pregenerating finished")
+            print("[MagicPrompt script] Pregenerating finished")
 
         images = []
         for i in range(state.job_count):
@@ -139,10 +150,10 @@ class Script(scripts.Script):
                     p.prompt = prompts[i]
                 else:
                     # ...or generate one if pregenerating is disabled
-                    print(f"Generating prompt for {getOrdinalNum(i+1)} batch...")
-                    p.prompt = ai.generate_one(prompt=originalPrompt, max_length=promptLength, temperature=temp)
+                    print(f"[MagicPrompt script] Generating prompt for {getOrdinalNum(i+1)} batch...")
+                    p.prompt = self.gpt.generate_one(prompt=originalPrompt, max_length=promptLength, temperature=temp)
 
-            print(f"Generated prompt for {getOrdinalNum(i+1)} batch: {p.prompt}")
+            print(f"[MagicPrompt script] Generated prompt for {getOrdinalNum(i+1)} batch: {p.prompt}")
 
             # for whatever reason .append() doesn't work
             images += process_images(p).images
@@ -151,8 +162,8 @@ class Script(scripts.Script):
                 if not p.seed == -1:
                     p.seed += 1
 
-        # Unloading the model
+        # Unload model
         if doUnloadModel:
-            ai = None
+            del self.gpt
 
         return Processed(p, images, p.seed, "")
