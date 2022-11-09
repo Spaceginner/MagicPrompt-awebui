@@ -15,15 +15,7 @@ Temp controls how random the model is, e.g. temp of 1 will make model unpredicti
 
 ## Installation
 
-1. Download this scipt and put it in `<WebUI folder>\scripts` folder
-2. Run command below in `<WebUI folder>\models` to download MagicPrompt model.
-```
-git clone https://huggingface.co/Gustavosta/MagicPrompt-Stable-Diffusion
-```
-3. Open `<WebUI folder>\requirements_versions.txt` and add **aitextgen** to the end of the list
-4. Launch and wait until it says `Running on local URL:  http://127.0.0.1:7860` in console (or something similar)
-5. <small>(Optional but recommended)</small> Edit the `<WebUI folder>\requirements_versions.txt` and remove the **aitextgen** line after it has successfully run at least once, that way `git pull` won't throw errors on you.
-6. You are done!
+1. Download the script and run it. It is sooo simple. (if autoinstallation fails, create an issue)
 ## Why prompt is same for multiple images???
 
 well, i didnt figure out how to change prompt from image to image. so, for now it changes prompt from batch to batch (you need to change **batch count** not **batch size**). if you did everything and still has this problem, create an issue and describe what you did and what the settings are.
