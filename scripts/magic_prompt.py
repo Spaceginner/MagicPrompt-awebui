@@ -36,8 +36,10 @@ try:
     from aitextgen import aitextgen
 except:
     print("[MagicPrompt script] aitextgen module is not found, downloading...")
-    if os.path.exists("./venv"):
+    if os.path.exists("./venv/Scripts/"):
         subprocess.call(["./venv/Scripts/python", "-m", "pip", "-q", "--disable-pip-version-check", "--no-input", "install", "aitextgen"])
+    elif os.path.exists("./venv/bin/"):
+        subprocess.call(["./venv/bin/python", "-m", "pip", "-q", "--disable-pip-version-check", "--no-input", "install", "aitextgen"])
     else:
         subprocess.call(["python", "-m", "pip", "-q", "--disable-pip-version-check", "--no-input", "install", "aitextgen"])
     print("[MagicPrompt script] aitextgen module is downloaded")
