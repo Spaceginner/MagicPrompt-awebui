@@ -1,19 +1,5 @@
 """
 User script for AUTOMATIC111's SD WebUI that integrates MagicPrompt
-Copyright (C) 2022 Spaceginner
-
-This user script is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This user script is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this user script.  If not, see <https://www.gnu.org/licenses/>.
 
 Contact me via Discord (Spaceginner#7688), email (ivan.demian2009@gmail.com)
 or via "Issues" tab on Github page of this script
